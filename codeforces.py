@@ -1,136 +1,114 @@
-import requests
-import json
-import time
 
-class Trie(object):
-    """The trie object"""
+import random
+# library that we use in order to choose
+# on random words from a list of words
 
-    def __init__(self):
-        """
-        The trie has at least the root node.
-        The root node does not store any character
-        """
-        self.root = TrieNode("")
-    
-    def insert(self, word):
-        """Insert a word into the trie"""
-        node = self.root
-        
-        # Loop through each character in the word
-        # Check if there is no child containing the character, create a new child for the current node
+name = input("What is your name? ")
+# Here the user is asked to enter the name first
+
+print("Good Luck ! ", name)
+
+repeat = True
+while repeat == True:
+    fruits = ['banana', 'apricot', 'cucumber', 'guava', 'mulberry',
+              'orange', 'papaya', 'pear', 'peach', 'berry']
+
+    animals = ['cobra', 'goose', 'penguin', 'frog', 'mouse', 'flamingo',
+               'rabbit', 'crow', 'whale', 'lion', 'monkey', 'ostrich',
+               'peacock', 'raccoon', 'rhinoceros', 'sheep', 'dogs',
+               'squirrel', 'tiger', 'vulture']
+
+    accessories = ['ring', 'bangle', 'lipstick', 'handbag', 'crown',
+                   'necklace', 'watch', 'caps', 'glasses', 'wallet',
+                   'belts', 'comb', 'pendent', 'earring', 'scarf',
+                   'backpack', 'keychain', 'hairpin', 'shoes', 'hats',
+                   'jacket', 'boots', 'socks', 'stocking', 'muffler',
+                   'gloves', 'umbrella', 'ribbon']
+
+    stationary = ['notebook', 'tape', 'pencil', 'eraser', 'sharpener',
+                  'files', 'fevicol', 'inkpot', 'chalk', 'duster',
+                  'glue', 'paper', 'cutter', 'chart', 'colours',
+                  'stapler', 'marker', 'staples', 'clips', 'calculator',
+                  'envelope', 'register']
+
+    words = fruits + animals + accessories + stationary
+    # Function will choose one random
+    # word from this list of words
+    word = random.choice(words)
+    print("Your word has", len(word), "letters.")
+    # Game would randomly choose words
+    print()
+    if word in fruits:  # Give category of word
+        print("Your word is a Fruit.")
+    elif word in accessories:
+        print("Your word is related to Accessory.")
+    elif word in stationary:
+        print("Your word is related to Stationary.")
+    elif word in animals:
+        print("Your word is an Animal")
+    print("Guess the characters")
+
+    guesses = ''
+
+    # any number of turns can be used here
+    turns = 5
+
+    while turns > 0:
+
+        # counts the number of times a user fails
+        failed = 0
+
+        # all characters from the input
+        # word taking one at a time.
+        list = []
         for char in word:
-            if char in node.children:
-                node = node.children[char]
+
+            # comparing that character with
+            # the character in guesses
+
+            if char in guesses:
+                list.append(char)
+
             else:
-                # If a character is not found,
-                # create a new node in the trie
-                new_node = TrieNode(char)
-                node.children[char] = new_node
-                node = new_node
-        
-        # Mark the end of a word
-        node.is_end = True
+                list.append('*')
 
-        # Increment the counter to indicate that we see this word once more
-        node.counter += 1
-        
-    def dfs(self, node, prefix):
-        """Depth-first traversal of the trie
-        
-        Args:
-            - node: the node to start with
-            - prefix: the current prefix, for tracing a
-                word while traversing the trie
-        """
-        if node.is_end:
-            self.output.append((prefix + node.char, node.counter))
-        
-        for child in node.children.values():
-            self.dfs(child, prefix + node.char)
-        
-    def query(self, x):
-        """Given an input (a prefix), retrieve all words stored in
-        the trie with that prefix, sort the words by the number of 
-        times they have been inserted
-        """
-        # Use a variable within the class to keep all possible outputs
-        # As there can be more than one word with such prefix
-        self.output = []
-        node = self.root
-        
-        # Check if the prefix is in the trie
-        for char in x:
-            if char in node.children:
-                node = node.children[char]
-            else:
-                # cannot found the prefix, return empty list
-                return []
-        
-        # Traverse the trie to get all candidates
-        self.dfs(node, x[:-1])
+                # for every failure 1 will be
+                # incremented in failure
+                failed += 1
+        print('.'.join(list))
 
-        # Sort the results in reverse order and return
-        return sorted(self.output, key=lambda x: x[1], reverse=True)
+        if failed == 0:
+            # user will win the game if failure is 0
+            # and 'You Win' will be given as output
+            print("You Win")
 
+            # this print the correct word
+            print("The word is: ", word)
+            break
 
-def search_problems(rating, userlist, tags):
-    user_data = []
+        # if user has input the wrong alphabet then
+        # it will ask user to enter another alphabet
+        guess = input("guess a character:")
 
-    for i in userlist:
-        url = 'https://codeforces.com/api/user.status?handle=' + i + '&from=1&count=2000'  # all solved questions by the  user
-        r = requests.get(url).content
-        data = json.loads(r)
-        user_data.append(data)
+        # every input character will be stored in guesses
+        guesses += guess
 
+        # check input with the character in word
+        if guess not in word:
 
-    solved = set()
+            turns -= 1
 
-    a = open("solved.txt", "r").read().split(" ")
-    for i in a:
-        solved.add(i)
-    for i in user_data:
-        for j in range(len(i['result'])):
-            solved.add(str(i['result'][j]['problem']['contestId']) + str(
-                i['result'][j]['problem']['index']))  # appending all the solved question by users in set
-    lst = []
-    url = " https://codeforces.com/api/problemset.problems?"  # downloding all the problems form codeforces
-    if tags:  # not working need to fix this
-        url += ';'.join(tags)
-    r = requests.get(url).content
-    itr = json.loads(r)
+            # if the character doesn’t match the word
+            # then “Wrong” will be given as output
+            print("Wrong")
 
-    rate = {}  # for storing the ratings for questions
+            # this will print the number of
+            # turns left for the user
+            print("You have", + turns, 'more guesses')
 
-    for i in itr['result']['problems']:
-        res = str(i['contestId']) + "/" + str(i['index'])
-        try:
-            rate[res] = i['rating']
-        except:
-            pass
+            if turns == 0:
+                print("You Loose")
+                play_again = input("Would you like to play again? Type Y for yes and N for No!")
+                if play_again == "N":
+                    repeat = False
 
-    for i in itr['result']['problemStatistics']:
-        lst.append(i)
-    lst = sorted(lst, key=lambda i: i['solvedCount'],
-                 reverse=True)  # sorting the problems based on number of solved count
-    return_list = []
-    for k in rating:
-        for i in lst:
-            if str(i['contestId']) + str(
-                    i['index']) not in solved:  # checking if any of the user has solved this problem
-                res = str(i['contestId']) + "/" + i['index']
-                try:
-                    if rate[res] == k:  # matching the rating.
-                        solved.add(str(i['contestId']) + str(i['index']))
-                        return_list.append("https://codeforces.com/problemset/problem/" + res)
-                        break
-                except:
-                    pass
-    return return_list
-
-# send_mess("******************************START**********************************")
-userlist = ['Manhar_11','bugabooset']
-rating = [800,900,1000,1100,1200]
-
-lst = search_problems(rating, userlist, [])
-for i in lst:
-    print(i)
